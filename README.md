@@ -7,11 +7,7 @@
 3. POP3 Commands
 4. POP3 Response Codes
 5. POP3 Security Issues
-6. POP3 Security Testing (Enumeration, Brute Force, Sniffing)
-7. POP3 Hardening (Defense)
-8. Commands Cheatsheet
-9. Hands-on Labs
-
+   
 ---
 
 ## 1. What is POP3?
@@ -58,41 +54,29 @@
 | `UIDL` | Get unique ID listing for all emails | `UIDL` |
 | `QUIT` | End session and apply deletions | `QUIT` |
 
-### POP3 Session Example
+---
 
-```text
-$ telnet mail.example.com 110
-Trying 192.168.1.10...
-Connected to mail.example.com.
-+OK POP3 server ready
-USER john
-+OK User name accepted
-PASS secret123
-+OK 3 messages (12345 octets)
-STAT
-+OK 3 12345
-LIST
-+OK 3 messages
-1 1024
-2 2048
-3 9273
-RETR 1
-+OK 1024 octets
-Received: from ...
-From: sender@example.com
-Subject: Hello
+## 4. POP3 Response Codes
 
-Message body...
-.
-DELE 1
-+OK Message 1 deleted
-QUIT
-+OK POP3 server signing off
-
+| Response | Meaning | Security Insight |
+|----------|---------|------------------|
+| `+OK` | Command successful | User exists / login success |
+| `-ERR` | Command failed | Wrong password or invalid command |
+| `+OK User name accepted` | Username is valid | **User exists (enumeration possible)** |
+| `-ERR Invalid user` | Username invalid | User does not exist |
+| `+OK Mailbox locked` | Login successful | Valid credentials |
+| `-ERR Authentication failed` | Wrong password | Invalid password |
 
 ---
-# +OK = exists  |  -ERR = no such user
 
-# Hydra brute force
-hydra -L users.txt -P pass.txt <target> pop3 -s 110
-hydra -L users.txt -P pass.txt <target> pop3s -s 995 -t 4
+## 5. POP3 Security Issues
+
+| Issue | Description | Risk |
+|-------|-------------|------|
+| **Plain text authentication** | Username/password sent in clear (port 110) | Credential sniffing |
+| **User enumeration** | `USER` command reveals if user exists | Attacker builds valid user list |
+| **Brute force** | No account lockout by default | Account compromise |
+| **No encryption** | Entire session can be sniffed | Email content leakage |
+| **Missing rate limiting** | Unlimited login attempts | Easy brute force |
+
+---
